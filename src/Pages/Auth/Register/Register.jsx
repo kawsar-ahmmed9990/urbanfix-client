@@ -10,12 +10,18 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { userRegister } = useAuth();
+  const { userRegister, googleSignin } = useAuth();
   const [show, setShow] = useState(false);
 
   const handleRegister = (data) => {
     // console.log(data);
     userRegister(data.email, data.password)
+      .then((result) => console.log(result.user))
+      .catch((error) => console.log(error));
+  };
+
+  const handleGoogleSignIn = () => {
+    googleSignin()
       .then((result) => console.log(result.user))
       .catch((error) => console.log(error));
   };
@@ -87,6 +93,20 @@ const Register = () => {
             <span className="text-sm text-gray-700">or</span>
             <div className="h-px w-16 bg-gray-400"></div>
           </div>
+
+          {/* Google Signin */}
+          <button
+            onClick={handleGoogleSignIn}
+            type="button"
+            className="flex items-center justify-center gap-3 bg-gray-200 text-gray-800 px-5 py-2 rounded-lg w-full font-semibold hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="google"
+              className="w-5 h-5"
+            />
+            Continue with Google
+          </button>
 
           <h1 className="font-semibold mx-auto">
             Don’t have an account?{" "}
