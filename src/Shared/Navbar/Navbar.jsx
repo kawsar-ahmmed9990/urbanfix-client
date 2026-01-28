@@ -1,7 +1,20 @@
 import React from "react";
 import Logo from "../../components/Logo/Logo";
+import useAuth from "../../hooks/useAuth";
+import { Link } from "react-router";
 
 const Navbar = () => {
+  const { user, signOutUser } = useAuth();
+  const handleLogOut = () => {
+    signOutUser()
+      .then(() => {
+        alert("Logged out successfully!");
+        // navigate("/auth/signin");
+      })
+      .catch((e) => {
+        alert(e.message);
+      });
+  };
   const links = (
     <>
       <li>
@@ -43,35 +56,25 @@ const Navbar = () => {
             tabIndex="-1"
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Parent</a>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <a>Item 3</a>
-            </li>
+            {links}
           </ul>
         </div>
 
-        {/* <img className="w-14 h-14" src={logo} alt="" />
-        <a className="btn btn-ghost text-xl">UrbanFix</a> */}
         <Logo></Logo>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Button</a>
+        {user ? (
+          <Link to={"/login"} onClick={handleLogOut} className="btn">
+            Log out
+          </Link>
+        ) : (
+          <Link to={"/login"} className="btn">
+            Log in
+          </Link>
+        )}
       </div>
     </div>
   );

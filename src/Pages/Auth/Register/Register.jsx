@@ -1,28 +1,58 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
+import axios from "axios";
 
 const Register = () => {
+  // use useForm from react-form-hook
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { userRegister, googleSignin } = useAuth();
+  const navigate = useNavigate();
+  const { userRegister, googleSignin, updateUserProfile } = useAuth();
   const [show, setShow] = useState(false);
 
+  //   Registration with email password authentication and update profile
   const handleRegister = (data) => {
     // console.log(data);
+    const profileImg = data.photo[0];
     userRegister(data.email, data.password)
-      .then((result) => console.log(result.user))
+      .then(() => {
+        // store the image in formData
+        const formData = new FormData();
+        formData.append("image", profileImg);
+
+        // send the photo to store and get url
+        const image_API_Url = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host}`;
+        axios.post(image_API_Url, formData).then((res) => {
+          //   console.log(res.data.data.url);
+          const userPofile = {
+            displayName: data.name,
+            photoURL: res.data.data.url,
+          };
+
+          //   update the user profile to firebase
+          updateUserProfile(userPofile)
+            .then(() => console.log("user profile update done"))
+            .catch((error) => {
+              console.log(error);
+            });
+        });
+      })
       .catch((error) => console.log(error));
   };
 
+  //   Registration with google
   const handleGoogleSignIn = () => {
     googleSignin()
-      .then((result) => console.log(result.user))
+      .then((result) => {
+        console.log(result.user);
+        navigate("/");
+      })
       .catch((error) => console.log(error));
   };
   return (
@@ -32,6 +62,31 @@ const Register = () => {
           <h1 className="text-xl font-bold mx-auto">Registration Form</h1>
           <form action="" onSubmit={handleSubmit(handleRegister)}>
             <fieldset className="fieldset">
+              {/* name */}
+              <label className="label font-bold">Name</label>
+              <input
+                type="text"
+                className="input"
+                {...register("name", { required: true })}
+                placeholder="Name"
+              />
+              {errors.name?.type === "required" && (
+                <span className="text-red-500 font-bold">Name is required</span>
+              )}
+              {/* photo  */}
+              <label className="label font-bold">Photo</label>
+              <input
+                type="file"
+                className="file-input"
+                {...register("photo", { required: true })}
+                placeholder="Photo URL"
+              />
+              {errors.photo?.type === "required" && (
+                <span className="text-red-500 font-bold">
+                  Photo is required
+                </span>
+              )}
+
               {/* Email */}
               <label className="label font-bold">Email</label>
               <input
@@ -42,9 +97,11 @@ const Register = () => {
               />
               {errors.email?.type === "required" && (
                 <span className="text-red-500 font-bold">
-                  This field is required
+                  Email is required
                 </span>
               )}
+
+              {/* Password */}
               <div className="relative">
                 <label className="label font-bold mb-2 ">Password</label>
                 <input
@@ -59,7 +116,7 @@ const Register = () => {
                 />
                 {errors.password?.type === "required" && (
                   <span className="text-red-500 font-bold">
-                    This field is required
+                    Password is required
                   </span>
                 )}
                 {errors.password?.type === "minLength" && (

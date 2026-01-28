@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
 
 const Login = () => {
@@ -12,17 +12,26 @@ const Login = () => {
   } = useForm();
   const { userLogin, googleSignin } = useAuth();
   const [show, setShow] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = (data) => {
     console.log(data);
     userLogin(data.email, data.password)
-      .then((result) => console.log(result.user))
+      .then((result) => {
+        console.log(result.user);
+        alert("Login Successfull!");
+        navigate("/");
+      })
       .catch((error) => console.log(error));
   };
 
   const handleGoogleSignIn = () => {
     googleSignin()
-      .then((result) => console.log(result.user))
+      .then((result) => {
+        console.log(result.user);
+        alert("Login Successfull!");
+        navigate("/");
+      })
       .catch((error) => console.log(error));
   };
   return (
@@ -42,7 +51,7 @@ const Login = () => {
               />
               {errors.email?.type === "required" && (
                 <span className="text-red-500 font-bold">
-                  This field is required
+                  Email is required
                 </span>
               )}
               {/* Password */}
@@ -60,7 +69,7 @@ const Login = () => {
                 />
                 {errors.password?.type === "required" && (
                   <span className="text-red-500 font-bold">
-                    This field is required
+                    Password is required
                   </span>
                 )}
                 {errors.password?.type === "minLength" && (
