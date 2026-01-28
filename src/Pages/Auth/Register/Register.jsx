@@ -42,13 +42,6 @@ const Register = () => {
                   {show ? <FaEye /> : <FaEyeSlash />}
                 </span>
               </div>
-              <button
-                // onClick={handleForgetPassword}
-                className="link link-hover text-start"
-                type="button"
-              >
-                Forgot password?
-              </button>
               <button className="btn bg-[#0B3C6F] text-white rounded-full mt-4">
                 Create Account
               </button>
@@ -63,7 +56,10 @@ const Register = () => {
 
           <h1 className="font-semibold mx-auto">
             Don’t have an account?{" "}
-            <Link className="text-blue-500 underline hover:text-blue-800">
+            <Link
+              to={"/login"}
+              className="text-blue-500 underline hover:text-blue-800"
+            >
               Login
             </Link>
           </h1>
