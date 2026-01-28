@@ -4,7 +4,11 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router";
 
 const Register = () => {
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [show, setShow] = useState(false);
 
   const handleRegister = (data) => {
@@ -22,17 +26,42 @@ const Register = () => {
               <input
                 type="email"
                 className="input"
-                {...register("email")}
+                {...register("email", { required: true })}
                 placeholder="Email"
               />
+              {errors.email?.type === "required" && (
+                <span className="text-red-500 font-bold">
+                  This field is required
+                </span>
+              )}
               <div className="relative">
-                <label className="label font-bold mb-2">Password</label>
+                <label className="label font-bold mb-2 ">Password</label>
                 <input
                   type={show ? "text" : "password"}
                   className="input"
-                  {...register("password")}
+                  {...register("password", {
+                    required: true,
+                    minLength: 6,
+                    pattern: /^(?=.*[a-z])(?=.*[A-Z]).+$/,
+                  })}
                   placeholder="Password"
                 />
+                {errors.password?.type === "required" && (
+                  <span className="text-red-500 font-bold">
+                    This field is required
+                  </span>
+                )}
+                {errors.password?.type === "minLength" && (
+                  <span className="text-red-500 font-bold">
+                    Password must be 6 character
+                  </span>
+                )}
+                {errors.password?.type === "pattern" && (
+                  <span className="text-red-500 font-bold">
+                    Password must contain at least 1 uppercase and 1 lowercase
+                    letter.
+                  </span>
+                )}
                 <span
                   onClick={() => {
                     setShow(!show);
