@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router";
+import useAuth from "../../../hooks/useAuth";
 
 const Login = () => {
   const {
@@ -9,10 +10,14 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { userLogin } = useAuth();
   const [show, setShow] = useState(false);
 
   const handleLogin = (data) => {
     console.log(data);
+    userLogin(data.email, data.password)
+      .then((result) => console.log(result.user))
+      .catch((error) => console.log(error));
   };
   return (
     <div className="hero min-h-screen rounded-xl p-4">
