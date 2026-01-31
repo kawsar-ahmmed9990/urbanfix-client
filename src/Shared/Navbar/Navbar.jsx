@@ -15,6 +15,7 @@ const Navbar = () => {
         alert(e.message);
       });
   };
+  console.log(user);
   const links = (
     <>
       <li>
@@ -67,9 +68,43 @@ const Navbar = () => {
       </div>
       <div className="navbar-end">
         {user ? (
-          <Link to={"/login"} onClick={handleLogOut} className="btn">
-            Log out
-          </Link>
+          <>
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="">
+                <div className="w-12">
+                  <img
+                    className="w-10 h-10  md:w-12 md:h-12  rounded-full object-cover"
+                    src={
+                      user?.photoURL ||
+                      "https://i.ibb.co/Kcdb9M8W/download-1.png"
+                    }
+                    alt="user"
+                  />
+                </div>
+              </label>
+
+              <ul
+                // className="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-48 p-2 shadow"
+              >
+                <li className="font-semibold text-center cursor-default">
+                  {user?.displayName || "Anonymous User"}
+                </li>
+
+                <div className="divider my-1"></div>
+
+                <li>
+                  <Link to="" className="font-bold flex mx-auto">
+                    Dashboard
+                  </Link>
+                </li>
+                {/* <div className="divider my-1"></div> */}
+                <li className="font-bold flex mx-auto">
+                  <button onClick={handleLogOut}>Logout</button>
+                </li>
+              </ul>
+            </div>
+          </>
         ) : (
           <Link to={"/login"} className="btn">
             Log in

@@ -18,7 +18,7 @@ const Register = () => {
 
   //   Registration with email password authentication and update profile
   const handleRegister = (data) => {
-    // console.log(data);
+    console.log("data---", data);
     const profileImg = data.photo[0];
     userRegister(data.email, data.password)
       .then(() => {
@@ -37,7 +37,7 @@ const Register = () => {
 
           //   update the user profile to firebase
           updateUserProfile(userPofile)
-            .then(() => console.log("user profile update done"))
+            .then(() => navigate("/"))
             .catch((error) => {
               console.log(error);
             });

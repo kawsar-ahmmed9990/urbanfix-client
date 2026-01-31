@@ -8,9 +8,10 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm();
-  const { userLogin, googleSignin } = useAuth();
+  const { userLogin, googleSignin, resetPassword } = useAuth();
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
 
@@ -34,6 +35,25 @@ const Login = () => {
       })
       .catch((error) => console.log(error));
   };
+
+  const handleForgetPassword = () => {
+    const email = getValues("email");
+
+    if (!email) {
+      alert("Please enter your email first!");
+      return;
+    }
+
+    resetPassword(email)
+      .then(() => {
+        alert("Password reset email sent! Please check your inbox.");
+      })
+      .catch((error) => {
+        console.error(error);
+        alert(error.message);
+      });
+  };
+
   return (
     <div className="hero min-h-screen rounded-xl p-4">
       <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -94,6 +114,7 @@ const Login = () => {
               </div>
               <button
                 // onClick={handleForgetPassword}
+                onClick={handleForgetPassword}
                 className="link link-hover text-start"
                 type="button"
               >
