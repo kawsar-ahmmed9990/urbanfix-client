@@ -19,13 +19,13 @@ const Navbar = () => {
   const links = (
     <>
       <li>
-        <a>Home</a>
+        <Link to={"/"}>Home</Link>
       </li>
       <li>
-        <a>All Issues</a>
+        <Link to={"/allissues"}>All Issues</Link>
       </li>
       <li>
-        <a>Extra one</a>
+        <Link to={"/addissue"}>Add Issue</Link>
       </li>
       <li>
         <a>Extra two</a>
