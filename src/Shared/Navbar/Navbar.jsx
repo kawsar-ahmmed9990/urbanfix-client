@@ -30,8 +30,16 @@ const Navbar = () => {
       <li>
         <a>Extra two</a>
       </li>
+      {user && (
+        <>
+          <li>
+            <Link to={"/dashboard"}>Dashboard</Link>
+          </li>
+        </>
+      )}
     </>
   );
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">

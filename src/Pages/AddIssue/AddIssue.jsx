@@ -10,7 +10,7 @@ const AddIssue = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
+    // reset,
   } = useForm();
   const axiosSecure = useAxiosSecure();
   const handleIssueSubmit = async (data) => {
@@ -31,7 +31,7 @@ const AddIssue = () => {
     axiosSecure
       .post("/issues", formPayload)
       .then((res) => console.log("after--", res.data));
-    reset();
+    // reset();
   };
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
