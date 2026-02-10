@@ -4,9 +4,9 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
 import axios from "axios";
+import useSaveUser from "../../../hooks/useSaveUser";
 
 const Register = () => {
-  // use useForm from react-form-hook
   const {
     register,
     handleSubmit,
@@ -15,6 +15,8 @@ const Register = () => {
   const navigate = useNavigate();
   const { userRegister, googleSignin, updateUserProfile } = useAuth();
   const [show, setShow] = useState(false);
+
+  useSaveUser();
 
   //   Registration with email password authentication and update profile
   const handleRegister = (data) => {

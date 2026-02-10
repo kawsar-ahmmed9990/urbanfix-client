@@ -12,34 +12,60 @@ import DashboardHome from "../Pages/Dashboard/DashboardHome/DashboardHome";
 import MyIssues from "../Pages/Dashboard/MyIssue/MyIssues";
 import Profile from "../Pages/Dashboard/Profile/Profile";
 import ReportIssue from "../Pages/Dashboard/ReportIssue/ReportIssue";
-import IssueDetail from "../Pages/IssueDetail/IssueDetail";
 import UpdateIssue from "../Pages/Dashboard/UpdateIssue/UpdateIssue";
+import PaymentCancel from "../Pages/Dashboard/PaymentCancel/PaymentCancel";
+import PaymentSuccess from "../Pages/Dashboard/PaymentSuccess/PaymentSuccess";
+import AdminDashboardHome from "../Pages/AdminDashboard/AdminDashboardHome/AdminDashboardHome";
+import ManageUsers from "../Pages/AdminDashboard/ManageUsers/ManageUsers";
+import ManageStaff from "../Pages/AdminDashboard/ManageStaff/ManageStaff";
+import AllIssuesAdmin from "../Pages/AdminDashboard/AllIssuesAdmin/AllIssuesAdmin";
+import PaymentsAdmin from "../Pages/AdminDashboard/PaymentsAdmin/PaymentsAdmin";
+import StaffDashboardHome from "../Pages/StaffDashboard/StaffDashboardHome/StaffDashboardHome";
+import AssignIssues from "../Pages/StaffDashboard/AssignIssues/AssignIssues";
+import PrivateRoute from "./PrivateRoute";
+import IssueDetails from "../Pages/IssueDetails/IssueDetails";
+import About from "../Pages/About/About";
+import OurMission from "../Pages/OurMission/OurMission";
+import ErrorPage from "../components/ErrorPage/ErrorPage";
+import PublicRoute from "./PublicRoute";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: RootLayout,
+    element: <RootLayout></RootLayout>,
+    errorElement: <ErrorPage></ErrorPage>,
     children: [
       {
         path: "/",
-        Component: Home,
+        element: <Home></Home>,
       },
       {
         path: "/allissues",
-        Component: AllIssues,
+        element: <AllIssues></AllIssues>,
+      },
+      {
+        path: "/about",
+        element: <About></About>,
+      },
+      {
+        path: "/mission",
+        element: <OurMission></OurMission>,
       },
       {
         path: "/issuedetail/:id",
-        Component: IssueDetail,
+        element: (
+          <PrivateRoute>
+            <IssueDetails></IssueDetails>
+          </PrivateRoute>
+        ),
       },
       {
         path: "/updateissue/:id",
-
-        Component: UpdateIssue,
+        element: <UpdateIssue></UpdateIssue>,
       },
       {
         path: "/addissue",
-        Component: AddIssue,
+        element: <AddIssue></AddIssue>,
       },
     ],
   },
@@ -49,17 +75,29 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "login",
-        Component: Login,
+        element: (
+          <PublicRoute>
+            <Login></Login>
+          </PublicRoute>
+        ),
       },
       {
         path: "register",
-        Component: Register,
+        element: (
+          <PublicRoute>
+            <Register></Register>
+          </PublicRoute>
+        ),
       },
     ],
   },
   {
     path: "/dashboard",
-    Component: DashboardLayout,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout></DashboardLayout>
+      </PrivateRoute>
+    ),
     children: [
       {
         index: true,
@@ -75,6 +113,70 @@ export const router = createBrowserRouter([
       },
       {
         path: "myprofile",
+        Component: Profile,
+      },
+      {
+        path: "paymentsuccess",
+        Component: PaymentSuccess,
+      },
+      {
+        path: "paymentcancel",
+        Component: PaymentCancel,
+      },
+    ],
+  },
+  {
+    path: "/admindashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout></DashboardLayout>
+      </PrivateRoute>
+    ),
+    children: [
+      {
+        index: true,
+        Component: AdminDashboardHome,
+      },
+      {
+        path: "allissue",
+        Component: AllIssuesAdmin,
+      },
+      {
+        path: "manageusers",
+        Component: ManageUsers,
+      },
+      {
+        path: "managestaff",
+        Component: ManageStaff,
+      },
+      {
+        path: "payments",
+        Component: PaymentsAdmin,
+      },
+      {
+        path: "profile",
+        Component: Profile,
+      },
+    ],
+  },
+  {
+    path: "/staffdashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout></DashboardLayout>
+      </PrivateRoute>
+    ),
+    children: [
+      {
+        index: true,
+        Component: StaffDashboardHome,
+      },
+      {
+        path: "assignissue",
+        Component: AssignIssues,
+      },
+      {
+        path: "profile",
         Component: Profile,
       },
     ],

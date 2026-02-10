@@ -1,74 +1,59 @@
-// import React from "react";
-
-// const IssueCard = ({ issue }) => {
-//   const { photo, description, priority, title, category, status } = issue;
-//   return (
-//     <>
-//       <div className="card bg-base-100 w-96 shadow-sm">
-//         <figure>
-//           <img src={photo} alt="Shoes" />
-//         </figure>
-//         <div className="card-body">
-//           <h2 className="card-title">
-//             {title}
-//             <div className="badge badge-secondary">{priority}</div>
-//           </h2>
-//           <p>{description}</p>
-//           <div className="card-actions justify-between">
-//             <div className="badge badge-outline">Category: {category}</div>
-//             <div className="badge badge-outline">Status: {status}</div>
-//           </div>
-//           <div className="card-actions justify-end">
-//             <div className="badge badge-outline">Fashion</div>
-//             <div className="badge badge-outline">Products</div>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default IssueCard;
-
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
-// import EditIssueModal from "./EditIssueModal";
 
-const IssueCard = ({ issue, refetch }) => {
+const IssueCard = ({ issue, setIssues }) => {
+  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate();
 
-  const handleDelete = async () => {
-    const confirm = window.confirm("Are you sure?");
-    if (!confirm) return;
+  const handleUpvote = async () => {
+    if (!user) return navigate("/login");
 
-    await axiosSecure.delete(`/issues/${issue._id}`);
-    refetch(); // instant UI update
+    try {
+      await axiosSecure.patch(`/issues/upvote/${issue._id}`);
+      setIssues((prev) =>
+        prev.map((i) =>
+          i._id === issue._id ? { ...i, upvoteCount: i.upvoteCount + 1 } : i,
+        ),
+      );
+    } catch (err) {
+      alert(err.response?.data?.message);
+    }
   };
 
   return (
-    <div className="card bg-base-100 shadow-md">
-      <img src={issue.image} alt="" className="h-40 object-cover" />
+    <div className="card shadow-md">
+      <img src={issue.photo} className="h-40 w-full object-cover" />
 
       <div className="card-body">
-        <h2 className="font-bold">{issue.title}</h2>
-        <p className="text-sm">{issue.location}</p>
+        <h3 className="font-bold">{issue.title}</h3>
+        <p>{issue.location}</p>
 
-        <div className="flex gap-2">
-          <span className="badge">{issue.status}</span>
-          <span className="badge badge-warning">{issue.priority}</span>
+        <div className="flex gap-2 flex-wrap">
+          <span className="badge">{issue.category}</span>
+          <span className="badge badge-info">{issue.status}</span>
+          <span
+            className={`badge ${
+              issue.priority === "high" ? "badge-error" : "badge-success"
+            }`}
+          >
+            {issue.priority}
+          </span>
+          {issue.isBoosted && (
+            <span className="badge badge-primary">Boosted</span>
+          )}
         </div>
 
-        <div className="card-actions mt-4">
-          {issue.status === "pending" && (
-            <EditIssueModal issue={issue} refetch={refetch} />
-          )}
-
-          <button onClick={handleDelete} className="btn btn-error btn-sm">
-            Delete
+        <div className="flex justify-between mt-4">
+          <button onClick={handleUpvote} className="btn btn-outline btn-sm">
+            👍 {issue.upvoteCount}
           </button>
-
-          <Link to={`/issues/${issue._id}`} className="btn btn-outline btn-sm">
-            View
+          <Link
+            to={`/issuedetail/${issue._id}`}
+            className="btn btn-primary btn-sm"
+          >
+            View Details
           </Link>
         </div>
       </div>

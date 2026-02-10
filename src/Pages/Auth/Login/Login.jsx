@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
+import useSaveUser from "../../../hooks/useSaveUser";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const {
@@ -14,43 +16,77 @@ const Login = () => {
   const { userLogin, googleSignin, resetPassword } = useAuth();
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
+  useSaveUser();
+  const loc = location.state?.from?.pathname || "/";
   const handleLogin = (data) => {
     console.log(data);
     userLogin(data.email, data.password)
       .then((result) => {
         console.log(result.user);
-        alert("Login Successfull!");
-        navigate("/");
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful!",
+        });
+        navigate(loc, { replace: true });
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.error(error);
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: error.message,
+        });
+      });
   };
 
   const handleGoogleSignIn = () => {
     googleSignin()
       .then((result) => {
         console.log(result.user);
-        alert("Login Successfull!");
-        navigate("/");
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful!",
+        });
+        navigate(loc, { replace: true });
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.error(error);
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: error.message,
+        });
+      });
   };
 
   const handleForgetPassword = () => {
     const email = getValues("email");
 
     if (!email) {
-      alert("Please enter your email first!");
-      return;
+      return Swal.fire({
+        icon: "warning",
+        title: "Email Required",
+        text: "Please enter your email first!",
+      });
     }
 
     resetPassword(email)
       .then(() => {
-        alert("Password reset email sent! Please check your inbox.");
+        Swal.fire({
+          icon: "success",
+          title: "Email Sent",
+          text: "Password reset email sent! Please check your inbox.",
+        });
       })
       .catch((error) => {
         console.error(error);
-        alert(error.message);
+        Swal.fire({
+          icon: "error",
+          title: "Failed",
+          text: error.message,
+        });
       });
   };
 
@@ -113,7 +149,6 @@ const Login = () => {
                 </span>
               </div>
               <button
-                // onClick={handleForgetPassword}
                 onClick={handleForgetPassword}
                 className="link link-hover text-start"
                 type="button"

@@ -1,6 +1,5 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-
 import {
   LineChart,
   Line,
@@ -14,78 +13,75 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const DashboardHome = () => {
+  const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
 
-  // Fetch all issues
-  const { data: issues = [] } = useQuery({
-    queryKey: ["issues"],
+  // ---------------- Fetch Issues ----------------
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["issues", user?.email],
+    enabled: !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get("/issues");
-      return res.data;
+      const res = await axiosSecure.get(`/issues?email=${user.email}`);
+      // backend array or {issues: []}
+      if (Array.isArray(res.data)) return res.data;
+      if (res.data.issues) return res.data.issues;
+      return [];
     },
   });
 
-  // Fetch payments
-  const { data: payments = [] } = useQuery({
-    queryKey: ["payments"],
-    queryFn: async () => {
-      const res = await axiosSecure.get("/payments");
-      return res.data;
-    },
-  });
+  const issues = data;
 
-  // Compute stats
+  if (isLoading)
+    return <div className="text-center py-20">Loading dashboard...</div>;
+
+  // ---------------- Stats ----------------
   const totalIssues = issues.length;
-  const totalPending = issues.filter((i) => i.status === "Pending").length;
-  const totalInProgress = issues.filter(
-    (i) => i.status === "In-progress",
+  const totalPending = issues.filter(
+    (i) => i.status?.toLowerCase() === "pending",
   ).length;
-  const totalResolved = issues.filter((i) => i.status === "Resolved").length;
-  const totalPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+  const totalInProgress = issues.filter(
+    (i) => i.status?.toLowerCase() === "in-progress",
+  ).length;
+  const totalResolved = issues.filter(
+    (i) => i.status?.toLowerCase() === "resolved",
+  ).length;
 
-  // Chart data
+  // ---------------- Pie chart ----------------
   const statusChartData = [
     { name: "Pending", value: totalPending },
     { name: "In Progress", value: totalInProgress },
     { name: "Resolved", value: totalResolved },
   ];
-
   const COLORS = ["#FFBB28", "#0088FE", "#00C49F"];
+
+  // ---------------- Line chart ----------------
+  const issuesOverTime = issues.reduce((acc, issue) => {
+    const date = new Date(issue.createdAt).toLocaleDateString(); // <-- createdAt
+    const found = acc.find((d) => d.date === date);
+    if (found) found.value += 1;
+    else acc.push({ date, value: 1 });
+    return acc;
+  }, []);
 
   return (
     <div className="p-4 space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+      <h2 className="text-2xl font-bold mb-4">My Dashboard</h2>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-white shadow p-4 rounded text-center">
-          <p className="text-gray-500">Total Issues</p>
-          <p className="text-2xl font-bold">{totalIssues}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded text-center">
-          <p className="text-gray-500">Pending</p>
-          <p className="text-2xl font-bold">{totalPending}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded text-center">
-          <p className="text-gray-500">In Progress</p>
-          <p className="text-2xl font-bold">{totalInProgress}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded text-center">
-          <p className="text-gray-500">Resolved</p>
-          <p className="text-2xl font-bold">{totalResolved}</p>
-        </div>
-        <div className="bg-white shadow p-4 rounded text-center">
-          <p className="text-gray-500">Total Payments</p>
-          <p className="text-2xl font-bold">${totalPayments}</p>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard title="Total Issues" value={totalIssues} />
+        <StatCard title="Pending" value={totalPending} />
+        <StatCard title="In Progress" value={totalInProgress} />
+        <StatCard title="Resolved" value={totalResolved} />
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Pie Chart for Issue Status */}
+        {/* Pie Chart */}
         <div className="bg-white p-4 rounded shadow">
           <h3 className="font-semibold mb-2">Issues by Status</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -97,14 +93,10 @@ const DashboardHome = () => {
                 cx="50%"
                 cy="50%"
                 outerRadius={100}
-                fill="#8884d8"
                 label
               >
-                {statusChartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
+                {statusChartData.map((_, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
@@ -113,15 +105,11 @@ const DashboardHome = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Line Chart for Issues Over Time */}
+        {/* Line Chart */}
         <div className="bg-white p-4 rounded shadow">
           <h3 className="font-semibold mb-2">Issues Over Time</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={issues.map((i) => ({
-                date: new Date(i.createAt).toLocaleDateString(),
-              }))}
-            >
+            <LineChart data={issuesOverTime}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
@@ -135,5 +123,12 @@ const DashboardHome = () => {
     </div>
   );
 };
+
+const StatCard = ({ title, value }) => (
+  <div className="bg-white shadow p-4 rounded text-center">
+    <p className="text-gray-500">{title}</p>
+    <p className="text-2xl font-bold">{value}</p>
+  </div>
+);
 
 export default DashboardHome;

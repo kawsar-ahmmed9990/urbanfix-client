@@ -3,23 +3,24 @@ import React, { useEffect, useState } from "react";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import Swal from "sweetalert2";
 
 const UpdateIssue = () => {
   const { user } = useAuth();
   const { id } = useParams();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const axiosSecure = useAxiosSecure();
   const [loading, setLoading] = useState(true);
 
   const { register, handleSubmit, reset } = useForm();
 
-  // Fetch issue details
+  // ---------------- Fetch Issue ----------------
   useEffect(() => {
     const fetchIssue = async () => {
       try {
         const res = await axiosSecure.get(`/issues/${id}`);
-        reset(res.data);
+        reset(res.data); // res.data is the issue object
         setLoading(false);
       } catch (err) {
         console.error(err.response?.data || err);
@@ -29,15 +30,13 @@ const UpdateIssue = () => {
     fetchIssue();
   }, [id, axiosSecure, reset]);
 
+  // ---------------- Update Submit ----------------
   const handleUpdateSubmit = async (data) => {
     try {
-      let formPayload = { ...data };
-
+      const formPayload = { ...data };
       delete formPayload._id;
 
-      delete formPayload.photo;
-
-      // new image uploaded
+      // Handle new image upload
       if (
         data.photo &&
         data.photo.length > 0 &&
@@ -52,12 +51,33 @@ const UpdateIssue = () => {
         formPayload.photo = res.data.data.url;
       }
 
-      await axiosSecure.patch(`/issues/${id}`, formPayload);
+      const timelineEntry = {
+        action: "Issue updated by user",
+        date: new Date(),
+      };
 
-      alert("Issue updated successfully!");
+      await axiosSecure.patch(`/issues/${id}`, {
+        ...formPayload,
+        timelineEntry,
+      });
+
+      // SweetAlert2 success
+      await Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Issue updated successfully!",
+        confirmButtonText: "OK",
+      });
+
+      navigate("/dashboard/myissues");
     } catch (err) {
       console.error(err.response?.data || err);
-      alert("Failed to update issue.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to update issue.",
+        confirmButtonText: "OK",
+      });
     }
   };
 

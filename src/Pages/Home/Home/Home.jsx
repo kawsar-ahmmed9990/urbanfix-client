@@ -1,8 +1,22 @@
 import React from "react";
-import logo from "../../../assets/urbanlogo-removebg-preview.png";
+import Banner from "../../../components/Banner/Banner";
+import Features from "../../../components/Features/Features";
+import HowItWorks from "../../../components/HowItWorks/HowItWorks";
+import UserRoles from "../../../components/UserRoles/UserRoles";
+import Testimonials from "../../../components/Testimonials/Testimonials";
+import LatestResolvedIssues from "../../../components/LatestResolvedIssues/LatestResolvedIssues";
 
 const Home = () => {
-  return <img src={logo} alt="" />;
+  return (
+    <div>
+      <Banner></Banner>
+      <LatestResolvedIssues></LatestResolvedIssues>
+      <Features></Features>
+      <HowItWorks></HowItWorks>
+      <UserRoles></UserRoles>
+      <Testimonials></Testimonials>
+    </div>
+  );
 };
 
 export default Home;

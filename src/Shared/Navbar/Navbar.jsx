@@ -1,42 +1,77 @@
 import React from "react";
 import Logo from "../../components/Logo/Logo";
 import useAuth from "../../hooks/useAuth";
-import { Link } from "react-router";
+import { Navigate, NavLink, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Navbar = () => {
-  const { user, signOutUser } = useAuth();
+  const { user, dbUser, signOutUser } = useAuth();
+  const navigate = useNavigate();
+
   const handleLogOut = () => {
     signOutUser()
       .then(() => {
-        alert("Logged out successfully!");
-        // navigate("/auth/signin");
+        Swal.fire({
+          icon: "success",
+          title: "Logged out",
+          text: "Logged out successfully!",
+        }).then(() => {
+          // navigate("/");
+          navigate("/", { replace: true });
+        });
       })
       .catch((e) => {
-        alert(e.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: e.message,
+        });
       });
   };
-  console.log(user);
+
+  // NavLinks with active style
   const links = (
     <>
       <li>
-        <Link to={"/"}>Home</Link>
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            isActive ? "text-emerald-500 font-bold" : "text-slate-700"
+          }
+        >
+          Home
+        </NavLink>
       </li>
       <li>
-        <Link to={"/allissues"}>All Issues</Link>
+        <NavLink
+          to="/allissues"
+          className={({ isActive }) =>
+            isActive ? "text-emerald-500 font-bold" : "text-slate-700"
+          }
+        >
+          All Issues
+        </NavLink>
       </li>
       <li>
-        <Link to={"/addissue"}>Add Issue</Link>
+        <NavLink
+          to="/about"
+          className={({ isActive }) =>
+            isActive ? "text-emerald-500 font-bold" : "text-slate-700"
+          }
+        >
+          About
+        </NavLink>
       </li>
       <li>
-        <a>Extra two</a>
+        <NavLink
+          to="/mission"
+          className={({ isActive }) =>
+            isActive ? "text-emerald-500 font-bold" : "text-slate-700"
+          }
+        >
+          Our Mission
+        </NavLink>
       </li>
-      {user && (
-        <>
-          <li>
-            <Link to={"/dashboard"}>Dashboard</Link>
-          </li>
-        </>
-      )}
     </>
   );
 
@@ -52,13 +87,12 @@ const Navbar = () => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              {" "}
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
                 d="M4 6h16M4 12h8m-8 6h16"
-              />{" "}
+              />
             </svg>
           </div>
           <ul
@@ -68,55 +102,54 @@ const Navbar = () => {
             {links}
           </ul>
         </div>
-
-        <Logo></Logo>
+        <Logo />
       </div>
+
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
+
       <div className="navbar-end">
         {user ? (
-          <>
-            <div className="dropdown dropdown-end">
-              <label tabIndex={0} className="">
-                <div className="w-12">
-                  <img
-                    className="w-10 h-10  md:w-12 md:h-12  rounded-full object-cover"
-                    src={
-                      user?.photoURL ||
-                      "https://i.ibb.co/Kcdb9M8W/download-1.png"
-                    }
-                    alt="user"
-                  />
-                </div>
-              </label>
-
-              <ul
-                // className="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-48 p-2 shadow"
-              >
-                <li className="font-semibold text-center cursor-default">
-                  {user?.displayName || "Anonymous User"}
-                </li>
-
-                <div className="divider my-1"></div>
-
-                <li>
-                  <Link to="" className="font-bold flex mx-auto">
-                    Dashboard
-                  </Link>
-                </li>
-                {/* <div className="divider my-1"></div> */}
-                <li className="font-bold flex mx-auto">
-                  <button onClick={handleLogOut}>Logout</button>
-                </li>
-              </ul>
-            </div>
-          </>
+          <div className="dropdown dropdown-end">
+            <label tabIndex={0}>
+              <div className="w-12">
+                <img
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover"
+                  src={
+                    user?.photoURL || "https://i.ibb.co/Kcdb9M8W/download-1.png"
+                  }
+                  alt="user"
+                />
+              </div>
+            </label>
+            <ul className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-48 p-2 shadow">
+              <li className="font-semibold text-center cursor-default">
+                {user?.displayName || "Anonymous User"}
+              </li>
+              <div className="divider my-1"></div>
+              <li className="font-bold flex mx-auto">
+                <NavLink
+                  to={
+                    dbUser?.role === "admin"
+                      ? "/admindashboard"
+                      : dbUser?.role === "staff"
+                        ? "/staffdashboard"
+                        : "/dashboard"
+                  }
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+              <li className="font-bold flex mx-auto">
+                <button onClick={handleLogOut}>Logout</button>
+              </li>
+            </ul>
+          </div>
         ) : (
-          <Link to={"/login"} className="btn">
+          <NavLink to="/login" className="btn">
             Log in
-          </Link>
+          </NavLink>
         )}
       </div>
     </div>

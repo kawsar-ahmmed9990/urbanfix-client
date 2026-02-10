@@ -15,35 +15,34 @@ import { auth } from "../../Firebase/firebase.init";
 const googleProvider = new GoogleAuthProvider();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [authProviderLoading, setAuthProviderLoading] = useState(false);
 
-  //   Register with email password authentication
   const userRegister = (email, password) => {
     setAuthProviderLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
-  //   Update user Profile
   const updateUserProfile = (profile) => {
     return updateProfile(auth.currentUser, profile);
   };
 
-  //   login with email password authentication
   const userLogin = (email, password) => {
     setAuthProviderLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  //   login or register with google
   const googleSignin = () => {
     setAuthProviderLoading(true);
     return signInWithPopup(auth, googleProvider);
   };
 
-  //   signOut
   const signOutUser = () => {
     setAuthProviderLoading(true);
+    localStorage.removeItem("user");
     return signOut(auth);
   };
 
@@ -51,15 +50,18 @@ const AuthProvider = ({ children }) => {
     return sendPasswordResetEmail(auth, email);
   };
 
-  //   auth state observer
+  // Firebase auth observer
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        localStorage.setItem("user", JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem("user");
+      }
       setAuthProviderLoading(false);
     });
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const authInfo = {
@@ -72,7 +74,10 @@ const AuthProvider = ({ children }) => {
     signOutUser,
     resetPassword,
   };
-  return <AuthContext value={authInfo}>{children}</AuthContext>;
+
+  return (
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;

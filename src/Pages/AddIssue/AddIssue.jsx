@@ -10,16 +10,14 @@ const AddIssue = () => {
     register,
     handleSubmit,
     formState: { errors },
-    // reset,
   } = useForm();
   const axiosSecure = useAxiosSecure();
   const handleIssueSubmit = async (data) => {
     console.log(data);
-    const imageFile = data.photo[0]; // <-- same as register
+    const imageFile = data.photo[0];
     const formData = new FormData();
     formData.append("image", imageFile);
 
-    // Upload to imgbb (or any image hosting)
     const image_API_Url = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host}`;
     const res = await axios.post(image_API_Url, formData);
     const imageUrl = res.data.data.url;
@@ -31,7 +29,6 @@ const AddIssue = () => {
     axiosSecure
       .post("/issues", formPayload)
       .then((res) => console.log("after--", res.data));
-    // reset();
   };
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
