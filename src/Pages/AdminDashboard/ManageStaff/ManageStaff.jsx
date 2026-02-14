@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Swal from "sweetalert2";
+import useAuth from "../../../hooks/useAuth";
+import axios from "axios";
 
 const ManageStaff = () => {
   const axiosSecure = useAxiosSecure();
   const [staffs, setStaffs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
+  const { userRegister, updateUserProfile } = useAuth();
 
   const {
     register,
@@ -32,38 +35,75 @@ const ManageStaff = () => {
     fetchStaffs();
   }, []);
 
-  const onSubmit = async (data) => {
-    const { name, email, phone, photo, password } = data;
+  // const onSubmit = async (data) => {
+  //   const formData = new FormData();
+  //   formData.append("name", data.name);
+  //   formData.append("email", data.email);
+  //   formData.append("phone", data.phone || "");
+  //   formData.append("password", data.password);
 
-    if (!password) {
-      await Swal.fire({
-        icon: "warning",
-        title: "Oops!",
-        text: "Password must be provided for staff login!",
-      });
-      return;
+  //   if (data.photo && data.photo[0]) {
+  //     formData.append("photo", data.photo[0]);
+  //   }
+
+  //   try {
+  //     const res = await axiosSecure.post("/staff", formData, {
+  //       headers: { "Content-Type": "multipart/form-data" },
+  //     });
+
+  //     await Swal.fire({
+  //       icon: "success",
+  //       title: "Success!",
+  //       text: "Staff added successfully!",
+  //     });
+
+  //     setOpenModal(false);
+  //     reset();
+  //     fetchStaffs();
+  //   } catch (error) {
+  //     console.error(error);
+  //     await Swal.fire({
+  //       icon: "error",
+  //       title: "Error",
+  //       text: error.response?.data?.message || error.message,
+  //     });
+  //   }
+  // };
+
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("email", data.email);
+    formData.append("phone", data.phone || "");
+    formData.append("password", data.password);
+
+    if (data.photo && data.photo[0]) {
+      formData.append("photo", data.photo[0]);
     }
 
     try {
-      await axiosSecure.post("/staff", {
-        name,
-        email,
-        phone,
-        photo,
-        password,
+      // Send data to backend
+      const res = await axiosSecure.post("/staff", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // ✅ Success alert
       await Swal.fire({
         icon: "success",
-        title: "Success!",
-        text: "Staff added successfully!",
+        title: "Staff Added!",
+        text: res.data.message || "Staff registered successfully!",
       });
 
+      // Close modal and reset form
       setOpenModal(false);
       reset();
+
+      // Refresh staff list
       fetchStaffs();
     } catch (error) {
       console.error(error);
+
+      // Show error from backend
       await Swal.fire({
         icon: "error",
         title: "Error",
@@ -159,7 +199,6 @@ const ManageStaff = () => {
               {errors.name && (
                 <p className="text-red-500 text-sm">{errors.name.message}</p>
               )}
-
               <input
                 {...register("email", { required: "Email is required" })}
                 type="email"
@@ -169,7 +208,6 @@ const ManageStaff = () => {
               {errors.email && (
                 <p className="text-red-500 text-sm">{errors.email.message}</p>
               )}
-
               <input
                 {...register("phone")}
                 placeholder="Phone"
@@ -178,10 +216,9 @@ const ManageStaff = () => {
 
               <input
                 {...register("photo")}
-                placeholder="Photo URL"
+                type="file"
                 className="input input-bordered w-full"
               />
-
               <input
                 {...register("password", {
                   required: "Password is required",
@@ -195,7 +232,6 @@ const ManageStaff = () => {
                   {errors.password.message}
                 </p>
               )}
-
               <div className="modal-action flex flex-col sm:flex-row gap-2">
                 <button
                   type="button"

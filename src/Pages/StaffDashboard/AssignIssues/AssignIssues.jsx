@@ -5,7 +5,7 @@ import useAuth from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
 
 const statusFlow = {
-  Pending: ["In-progress"],
+  pending: ["In-progress"],
   "In-progress": ["Working"],
   Working: ["Resolved"],
   Resolved: ["Closed"],
@@ -27,6 +27,7 @@ const AssignIssues = () => {
         params.append("priority", filters.priority.toLowerCase());
 
       const res = await axiosSecure.get(`/issues?${params.toString()}`);
+
       return res.data;
     },
     keepPreviousData: true,

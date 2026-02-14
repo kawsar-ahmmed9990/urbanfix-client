@@ -37,8 +37,14 @@ const StaffDashboardHome = () => {
 
   // Stats
   const totalAssigned = issues.length;
-  const totalResolved = issues.filter((i) => i.status === "Resolved").length;
-  const totalPending = issues.filter((i) => i.status === "Pending").length;
+  // const totalResolved = issues.filter((i) => i.status === "Resolved").length;
+  // const totalPending = issues.filter((i) => i.status === "Pending").length;
+  const totalResolved = issues.filter(
+    (i) => i.status.toLowerCase() === "resolved",
+  ).length;
+  const totalPending = issues.filter(
+    (i) => i.status.toLowerCase() === "pending",
+  ).length;
 
   const today = new Date().toLocaleDateString();
   const todaysTasks = issues.filter(

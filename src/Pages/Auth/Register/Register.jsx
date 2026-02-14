@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router";
 import useAuth from "../../../hooks/useAuth";
 import axios from "axios";
 import useSaveUser from "../../../hooks/useSaveUser";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const Register = () => {
   const {
@@ -15,48 +16,62 @@ const Register = () => {
   const navigate = useNavigate();
   const { userRegister, googleSignin, updateUserProfile } = useAuth();
   const [show, setShow] = useState(false);
+  const axiosSecure = useAxiosSecure();
 
   useSaveUser();
 
-  //   Registration with email password authentication and update profile
-  const handleRegister = (data) => {
-    console.log("data---", data);
-    const profileImg = data.photo[0];
-    userRegister(data.email, data.password)
-      .then(() => {
-        // store the image in formData
-        const formData = new FormData();
-        formData.append("image", profileImg);
+  const handleRegister = async (data) => {
+    try {
+      const profileImg = data.photo[0];
 
-        // send the photo to store and get url
-        const image_API_Url = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host}`;
-        axios.post(image_API_Url, formData).then((res) => {
-          //   console.log(res.data.data.url);
-          const userPofile = {
-            displayName: data.name,
-            photoURL: res.data.data.url,
-          };
+      const firebaseUser = await userRegister(data.email, data.password);
 
-          //   update the user profile to firebase
-          updateUserProfile(userPofile)
-            .then(() => navigate("/"))
-            .catch((error) => {
-              console.log(error);
-            });
-        });
-      })
-      .catch((error) => console.log(error));
+      const formData = new FormData();
+      formData.append("image", profileImg);
+      const imgRes = await axios.post(
+        `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host}`,
+        formData,
+      );
+      const photoURL = imgRes.data.data.url;
+
+      await updateUserProfile({ displayName: data.name, photoURL });
+
+      const serverUser = {
+        name: data.name,
+        email: data.email,
+        photo: photoURL,
+        role: "citizen",
+      };
+
+      await axiosSecure.post("/users", serverUser);
+
+      navigate("/");
+    } catch (err) {
+      console.log("Registration error:", err);
+    }
   };
 
-  //   Registration with google
-  const handleGoogleSignIn = () => {
-    googleSignin()
-      .then((result) => {
-        console.log(result.user);
-        navigate("/");
-      })
-      .catch((error) => console.log(error));
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await googleSignin();
+      const user = result.user;
+
+      // Save to MongoDB
+      const serverUser = {
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+        role: "citizen",
+      };
+
+      await axiosSecure.post("/users", serverUser);
+
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+    }
   };
+
   return (
     <div className="hero min-h-screen rounded-xl p-4">
       <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -168,7 +183,7 @@ const Register = () => {
           </button>
 
           <h1 className="font-semibold mx-auto">
-            Don’t have an account?{" "}
+            Already have an account?{" "}
             <Link
               to={"/login"}
               className="text-blue-500 underline hover:text-blue-800"
